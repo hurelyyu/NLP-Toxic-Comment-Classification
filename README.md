@@ -4,7 +4,7 @@ Kaggle Competition
 Naive Bayse Model as Baseline, result as follow:
 
 2020-10-24 21:59:00,770 accuracy:0.9066583111389629
-2020-10-24 21:59:00,771 
+
 
               precision    recall  f1-score   support
 
