@@ -16,13 +16,16 @@ if __name__ == "__main__":
         try:
             config = yaml.safe_load(config_file)
             preprocessor = Preprocessor_cnn(config['preprocessing'], logger)
-            data_x, data_y, train_x, train_y, validate_x, validate_y, test_x = preprocessor.process()
+            # data_x, data_y, train_x, train_y, validate_x, validate_y, test_x = preprocessor.process()
+            _, _, train_x, train_y, validate_x, validate_y, test_x = preprocessor.process()
+            print(validate_x.shape)
+            if config['training']['model_name'] != 'naivebayse':
+                config['training']['vocab_size'] = len(preprocessor.word2ind.keys())
+
             trainer = Trainer(config['training'], logger, preprocessor.classes)
-            trainer.fit(train_x, train_y)
-            accuracy, cls_report = trainer.validate(validate_x, validate_y)
+            model, accuracy, cls_report, history = trainer.fit_and_validate(train_x, train_y, validate_x, validate_y)
             logger.info("accuracy:{}".format(accuracy))
             logger.info("\n{}\n".format(cls_report))
-            model = trainer.fit(data_x, data_y)
             predictor = Predictor(config['predict'], logger, model)
             probs = predictor.predict_prob(test_x)
             predictor.save_result(preprocessor.test_ids, probs)
