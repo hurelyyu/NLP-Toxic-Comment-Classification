@@ -1,0 +1,19 @@
+training:
+  model_name: 'cnn'
+  learning_rate: 0.8
+  embedding_dim: 100
+  embedding_file_input: ./data/glove.6B.100d.txt
+  dropout_rate: 0.2
+  filters: 250
+  kernel_size: 3
+  hidden_dims: 250
+  loss: binary_crossentropy
+  optimizer: adam
+  metrics: accuracy
+  batch_size: 32
+  epochs: 3
+  pred_batch_size: 128
+  verbose: 1
+proprocessing:
+  max_features: 20000
+  max_text_length: 400  

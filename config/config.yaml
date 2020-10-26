@@ -13,13 +13,27 @@ preprocessing:
   input_trainset: ./data/train.csv
   random_seed: 0
   split_ratio: 0.2
+  max_features: 20000
+  max_text_length: 400
+
+
 training:
   batch_normalization: true
-  dropout_rate: 0.5
-  epochs: 10
+  dropout_rate: 0.2
+  epochs: 3
   gradient_cliping: true
-  learning_rate: 1.0
-  model_name: naivebayse
-  optimizer: sgd
+  learning_rate: 0.8
+  model_name: cnn
+  embedding_dim: 100
+  embedding_file_input: ./data/glove.6B.100d.txt
+  filters: 250
+  kernel_size: 3
+  hidden_dims: 250
+  loss: binary_crossentropy
+  optimizer: adam
+  metrics: accuracy
+  batch_size: 32
+  pred_batch_size: 128
+  verbose: 1
 predict:
   output_path: ./data/submission.csv
