@@ -119,11 +119,12 @@ class Preprocessor_cnn(object):
 
 
     def process(self):
-        input_convertor = self.config.get('input_convertor', None)
+        # input_convertor = self.config.get('input_convertor', None)
         # label_convertor = self.config.get('label_convertor', None)
         train_df_x, train_df_y, train_x, train_y, validate_x, validate_y, test_x = \
             self.train_df_x, self.train_df_y, self.train_x, self.train_y, \
             self.validate_x, self.validate_y, self.test_x
+
         # if input_convertor == 'count_vectorization':
 
         #     train_x, validate_x = self.count_vectorization(train_x, validate_x)

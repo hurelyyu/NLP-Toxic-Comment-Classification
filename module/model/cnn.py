@@ -27,10 +27,11 @@ class CNN(object):
 
 	def predict(self, test_x):
 		predictions = np.zeros((test_x.shape[0], len(self.classes)))
+		# print(".............")
+		# print(predictions.shape)
+		# print(".............")
 		for idx, cls in enumerate(self.classes):
-			predictions[:, idx] = self.models[cls].predict(test_x,
-            	verbose=self.config['verbose'],
-            	batch_size=self.config['pred_batch_size'])
+			predictions[:, idx] = self.models[cls].predict(test_x,verbose=self.config['verbose'],batch_size=self.config['pred_batch_size'])
 		return predictions
 
 	def predict_prob(self, test_x):
