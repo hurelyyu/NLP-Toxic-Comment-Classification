@@ -10,13 +10,13 @@ class Trainer(object):
 		self.config = config
 		self.logger = logger
 		self.classes = classes
-		self._create_model(classes)
+		self._create_model(classes, config)
 
-	def _create_model(self, classes):
+	def _create_model(self, classes, config):
 		if self.config['model_name'] == 'naivebayse':
 			self.model = NaiveBayer(classes)
 		elif self.config['model_name'] == 'cnn':
-			self.model = CNN(classes)
+			self.model = CNN(classes, config)
 		else:
 			self.logger.warning("Model Type:{} is not support yet".
 				format(self.config['model_name']))

@@ -14,8 +14,10 @@ class CNN(object):
 		self.config = config
 		self.classes = classes
 		for cls in self.classes:
-			model = defined_cnn()
-			self.models[cls] = model
+			model = Sequential()
+			model_train = self.defined_cnn(self.config, model)
+			print(type(model_train))
+			self.models[cls] = model_train
 
 	def fit(self, train_x, train_y):
 		# enumerate :https://www.geeksforgeeks.org/enumerate-in-python/
@@ -40,12 +42,12 @@ class CNN(object):
 		return probs
 
 
-	def defined_cnn(self):
+	def defined_cnn(self, config, model):
 		model = Sequential()
-		model.add(Embedding(self.config['max_features'],
+		model.add(Embedding(20000,
     		self.config['embedding_dim'],
     		embeddings_initializer = tf.keras.initializers.constant(
-    			self._embedding_layer()),
+    			self._embedding_layer(text.Tokenizer(20000))),
     		trainable = False))
 		model.add(Dropout(self.config['dropout_rate']))
 		model.add(Conv1D(self.config['filters'],
@@ -66,7 +68,9 @@ class CNN(object):
     		optimizer=self.config['optimizer'],
     		metrics=self.config['metrics'])
 
-	def _embedding_layer(self, x_tokenizer, embeddings_index):
+		return model
+
+	def _embedding_layer(self, x_tokenizer):
 
 		embeddings_index = dict()
 		f = open(self.config['embedding_file_input'])
@@ -77,14 +81,14 @@ class CNN(object):
 			embeddings_index[word] = coef
 		print(f'Found {len(embeddings_index)} word vectors.')
 
-		embedding_matrix=np.zeros((max_features,self.config['embedding_dim']))
+		embedding_matrix=np.zeros((20000,self.config['embedding_dim']))
 		for word, idx in x_tokenizer.word_index.items():
-			if index > max_features-1:
+			if idx > self.config['max_features']-1:
 				break
 			else:
 				embedding_vector = embeddings_index.get(word)
 				if embedding_vector is not None:
-					embedding_matrix[index] = embedding_vector
+					embedding_matrix[idx] = embedding_vector
 
 		
 		return embedding_matrix		
