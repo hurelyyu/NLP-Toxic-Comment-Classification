@@ -6,7 +6,7 @@ preprocessing:
   - threat
   - insult
   - identity_hate
-  input_convertor: count_vectorization
+  input_convertor: nn_vectorization
   input_id_column: id
   input_testset: ./data/test.csv
   input_text_column: comment_text
@@ -15,20 +15,22 @@ preprocessing:
   split_ratio: 0.2
   max_features: 20000
   max_text_length: 400
+  maxlen: 128
 
 
 training:
   batch_normalization: true
-  dropout_rate: 0.2
-  epochs: 3
+  dropout_rate: 0.5
+  epochs: 1
   gradient_cliping: true
   learning_rate: 0.8
   model_name: cnn
   embedding_dim: 100
   embedding_file_input: ./data/glove.6B.100d.txt
-  filters: 250
-  kernel_size: 3
-  hidden_dims: 250
+  filters: 128
+  kernel_size: 7
+  maxlen: 128
+  hidden_dims: 256
   loss: binary_crossentropy
   optimizer: adam
   metrics: accuracy
