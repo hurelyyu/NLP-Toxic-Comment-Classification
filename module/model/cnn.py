@@ -12,9 +12,10 @@ from tensorflow.keras.layers import BatchNormalization
 
 class CNN(object):
 	def __init__(self, classes, config):
-		self.models = {}
+
 		self.config = config
 		self.classes = classes
+		self.num_class = len(classes)
 		# for cls in self.classes:
 	# 		# 	model = Sequential()
 	# 		# 	model_train = self.defined_cnn(self.config, model)
@@ -28,11 +29,8 @@ class CNN(object):
 	# 		class_labels = train_y[:,idx]
 	# 		self.models[cls].fit(train_x, class_labels, batch_size=self.config['batch_size'],epochs=self.config['epochs'],verbose = True)
 
-	def fit_and_validate(self, train_x, train_y, validate_x):
-		history = self.model.fit(train_x, train_y,
-								 epochs=self.config['epochs'],
-								 verbose=True,
-								 # validation_data=(validate_x, validate_y),
+	def fit_and_validate(self, train_x, train_y, validate_x, validate_y):
+		history = self.model.fit(train_x, train_y,epochs=self.config['epochs'],verbose=True,# validation_data=(validate_x, validate_y),
 								 batch_size=self.config['batch_size'])
 		predictions = self.predict(validate_x)
 		return predictions, history
@@ -47,7 +45,7 @@ class CNN(object):
 		# # print(".............")
 		# for idx, cls in enumerate(self.classes):
 		# 	predictions[:, idx] = self.models[cls].predict(test_x,verbose=self.config['verbose'],
-		# 												   batch_size=self.config['pred_batch_size']).flatten()
+		# 	batch_size=self.config['pred_batch_size']).flatten()
 		# return predictions
 
 	def predict_prob(self, test_x):
@@ -66,17 +64,17 @@ class CNN(object):
             embeddings_initializer="uniform",
             # embeddings_initializer = tf.keras.initializers.constant(
     			# self._embedding_layer(text.Tokenizer(20000))),
-    		trainable = False))
-		model.add(Dropout(self.config['dropout_rate']))
-		model.add(Conv1D(self.config['filters'],
-    		self.config['kernel_size'],
-    		padding = 'valid'))
+    		trainable = True, input_length=self.config['maxlen']))
+		#model.add(Dropout(self.config['dropout_rate']))
+		model.add(Conv1D(128,
+    		7,
+    		padding = 'same',activation='relu'))
 		model.add(BatchNormalization())
 		model.add(MaxPooling1D())
 		model.add(BatchNormalization())
-		model.add(Conv1D(self.config['filters'],
+		model.add(Conv1D(256,
     		5,
-    		padding = 'valid',
+    		padding = 'same',
     		activation = 'relu'))
 		model.add(GlobalMaxPooling1D())
 		model.add(BatchNormalization())
@@ -84,11 +82,12 @@ class CNN(object):
     		activation = 'relu'))
 		model.add(Dropout(self.config['dropout_rate']))
 		model.add(BatchNormalization())
-		model.add(Dense(6,activation='sigmoid'))
-		model.summary()
+		model.add(Dense(self.num_class, activation=None))
+		model.add(Dense(self.num_class,activation='sigmoid'))
 		model.compile(loss=self.config['loss'],
     		optimizer=self.config['optimizer'],
     		metrics=self.config['metrics'])
+		model.summary()
 
 		return model
 
