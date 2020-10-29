@@ -36,6 +36,6 @@ class Trainer(object):
 		return accuracy, cls_report
 
 	def fit_and_validate(self, train_x, train_y, validate_x, validate_y):
-		predictions, history = self.model.fit_and_validate(train_x, train_y, validate_x)
+		predictions, history = self.model.fit_and_validate(train_x, train_y, validate_x, validate_y)
 		accuracy, cls_report = self.metrics(predictions, validate_y)
 		return self.model, accuracy, cls_report, history
