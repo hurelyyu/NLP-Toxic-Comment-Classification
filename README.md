@@ -72,3 +72,11 @@ _________________________________________________________________
    macro avg       0.66      0.46      0.47      7111
 weighted avg       0.74      0.60      0.65      7111
  samples avg       0.98      0.95      0.93      7111
+
+cnn经验：
+• multi-classes single-label task:
+  • softmax (sum = 1)
+  • categorical_crossentropy
+• multi-classes multi-label task，每个分类是独⽴的：
+  • ‘sigmoid’ instead of ‘softmax’
+  • ‘binary_crossentropy’ instead of ‘categorical_crossentropy
