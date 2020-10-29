@@ -17,9 +17,10 @@ if __name__ == "__main__":
             config = yaml.safe_load(config_file)
             preprocessor = Preprocessor_cnn(config['preprocessing'], logger)
             # data_x, data_y, train_x, train_y, validate_x, validate_y, test_x = preprocessor.process()
+            #data_x, data_y, train_x, train_y, validate_x, validate_y, test_x = preprocessor.process()
             _, _, train_x, train_y, validate_x, validate_y, test_x = preprocessor.process()
             print(validate_x.shape)
-            if config['training']['model_name'] != 'naivebayse':
+            if config['training']['model_name'] != 'cnn':
                 config['training']['vocab_size'] = len(preprocessor.word2ind.keys())
 
             trainer = Trainer(config['training'], logger, preprocessor.classes)
