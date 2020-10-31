@@ -85,8 +85,10 @@ cnn经验：
   
 
 Pretrained Embedding:
+======================
 
-Learn from training process:
+Learned from training process:
+===========================================
 
 twitter is more suitable than wiki
 
