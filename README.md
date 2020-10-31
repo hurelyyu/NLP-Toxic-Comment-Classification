@@ -85,9 +85,17 @@ cnn经验：
   
 
 Pretrained Embedding:
+
 Learn from training process:
+
 twitter is more suitable than wiki
+
 27B meaning records 27billion user data
+
 100d meaning vector size is 100
+
 27B 100d twitter is more suitable than 27B 200d
+
 Using full train set better than partial train set
+
+Best kaggle is 0.94 so far
