@@ -82,3 +82,12 @@ cnn经验：
 • multi-classes multi-label task，每个分类是独⽴的：
   • ‘sigmoid’ instead of ‘softmax’
   • ‘binary_crossentropy’ instead of ‘categorical_crossentropy
+  
+
+Pretrained Embedding:
+Learn from training process:
+twitter is more suitable than wiki
+27B meaning records 27billion user data
+100d meaning vector size is 100
+27B 100d twitter is more suitable than 27B 200d
+Using full train set better than partial train set
