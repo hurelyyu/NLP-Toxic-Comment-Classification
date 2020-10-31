@@ -1,4 +1,7 @@
+import io
 import re, os, sys, string, itertools
+from collections import defaultdict
+
 import numpy as np
 import pandas as pd
 from nltk.tokenize import WordPunctTokenizer, word_tokenize, StanfordSegmenter, sent_tokenize, PunktSentenceTokenizer
@@ -135,12 +138,13 @@ class Preprocessor_cnn(object):
             train_x, validate_x, test_x = self.tfidf_vectorization(train_x, validate_x, test_x)
             # data_x, test_x = self.tfidf_vectorization(data_x, test_x)
         elif input_convertor == 'nn_vectorization':  # for neural network
-            train_x, validate_x, test_x = self.nn_vectorization(train_x, validate_x, test_x)
+            train_x, train_df_x, validate_x, test_x = self.nn_vectorization(train_x, train_df_x, validate_x, test_x)
+
             # data_x, test_x = self.nn_vectorization(data_x, test_x)
-        print(train_x.shape)
-        print(train_y.shape)
-        print(validate_x.shape)
-        print(validate_y.shape)
+        # print(train_x.shape)
+        # print(train_y.shape)
+        # print(validate_x.shape)
+        # print(validate_y.shape)
         return train_df_x, train_df_y, train_x, train_y, validate_x, validate_y, test_x
 
     # def count_vectorization(self, train, test):
@@ -171,24 +175,49 @@ class Preprocessor_cnn(object):
         return vectorized_train_x, vectorized_validate_x, vectorized_test_x
 
 
-    def nn_vectorization(self, train_x, validate_x, test_x):
+    def nn_vectorization(self, train_x, train_full_x, validate_x, test_x):
         self.word2ind = {}
         self.ind2word = {}
 
         specialtokens = ['<pad>','<unk>']
 
-        def addword(word2ind,ind2word,word):
-            if word in word2ind:
-                return
-            ind2word[len(word2ind)] = word
-            word2ind[word] = len(word2ind)
+        pretrained_embedding = self.config.get('embedding_file_input', None)
 
-        for token in specialtokens:
-            addword(self.word2ind, self.ind2word, token)
+        if pretrained_embedding is not None:
+            word2embedding = Preprocessor_cnn.load_vector(pretrained_embedding)
+            print(type(word2embedding))
+            vocab = specialtokens + list(word2embedding.keys())
+            vocab_size = len(vocab)
+            print("vocab_size")
+            print(vocab_size)
+            print("word2embedding size")
 
-        for sent in train_x:
-            for word in sent:
-                addword(self.word2ind, self.ind2word, word)
+            x_tokenizer = text.Tokenizer(vocab_size)
+            self.embedding_matrix = np.zeros((vocab_size, self.config['embedding_dim']))
+            for token in specialtokens:
+                word2embedding[token] = np.random.uniform(low=-1, high=1,
+                                size=(self.config['embedding_dim']))
+            #print(word2embedding)
+            for idx, word in enumerate(vocab):
+
+                self.word2ind[word] = idx
+                self.ind2word[idx] = word
+                #print(word)
+                self.embedding_matrix[idx] = word2embedding[word]
+
+        else:
+            def addword(word2ind,ind2word,word):
+                if word in word2ind:
+                    return
+                ind2word[len(word2ind)] = word
+                word2ind[word] = len(word2ind)
+
+            for token in specialtokens:
+                addword(self.word2ind, self.ind2word, token)
+
+            for sent in train_x:
+                for word in sent:
+                    addword(self.word2ind, self.ind2word, word)
 
         train_x_ids = []
         for sent in train_x:
@@ -196,6 +225,13 @@ class Preprocessor_cnn(object):
             train_x_ids.append(indsent)
 
         train_x_ids = np.array(train_x_ids)
+
+        train_full_x_ids = []
+        for sent in train_full_x:
+            indsent = [self.word2ind.get(i, self.word2ind['<unk>']) for i in sent]
+            train_full_x_ids.append(indsent)
+
+        train_full_x_ids = np.array(train_full_x_ids)
 
         validate_x_ids = []
         for sent in validate_x:
@@ -214,5 +250,19 @@ class Preprocessor_cnn(object):
         train_x_ids = keras.preprocessing.sequence.pad_sequences(train_x_ids, maxlen=self.config['maxlen'], padding='post',value=self.word2ind['<pad>'])
         validate_x_ids = keras.preprocessing.sequence.pad_sequences(validate_x_ids, maxlen=self.config['maxlen'], padding='post',value=self.word2ind['<pad>'])
         test_x_ids = keras.preprocessing.sequence.pad_sequences(test_x_ids, maxlen=self.config['maxlen'], padding='post',value=self.word2ind['<pad>'])
+        train_full_x_ids = keras.preprocessing.sequence.pad_sequences(train_full_x_ids, maxlen=self.config['maxlen'], padding='post',value=self.word2ind['<pad>'])
 
-        return train_x_ids, validate_x_ids, test_x_ids
+        return train_x_ids, train_full_x_ids, validate_x_ids, test_x_ids
+
+    @staticmethod
+    def load_vector(embedding_input):
+        embeddings_index = {}
+        f = io.open(embedding_input, 'r', encoding='utf-8')
+        for line in f:
+            tokens = line.split(' ')
+            word = tokens[0]
+            coef = np.asarray(tokens[1:], dtype='float32')
+            # coef = np.array(list(map(float, tokens[1:]))
+            embeddings_index[word] = coef
+        print(f'Found {len(embeddings_index)} word vectors.')
+        return embeddings_index
