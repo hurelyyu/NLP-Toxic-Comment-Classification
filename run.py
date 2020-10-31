@@ -1,7 +1,7 @@
 import yaml
 import logging
 import argparse
-from module import Preprocessor, Trainer, Predictor
+from module import Preprocessor_cnn, Trainer, Predictor
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process commandline')
@@ -15,15 +15,25 @@ if __name__ == "__main__":
     with open(args.config, 'r') as config_file:
         try:
             config = yaml.safe_load(config_file)
-            preprocessor = Preprocessor(config['preprocessing'], logger)
-            data_x, data_y, train_x, train_y, validate_x, validate_y, test_x = preprocessor.process()
-            trainer = Trainer(config['training'], logger, preprocessor.classes)
-            trainer.fit(train_x, train_y)
-            accuracy, cls_report = trainer.validate(validate_x, validate_y)
+            preprocessor = Preprocessor_cnn(config['preprocessing'], logger)
+            # data_x, data_y, train_x, train_y, validate_x, validate_y, test_x = preprocessor.process()
+            #data_x, data_y, train_x, train_y, validate_x, validate_y, test_x = preprocessor.process()
+            full_x, full_y, train_x, train_y, validate_x, validate_y, test_x = preprocessor.process()
+            print(validate_x.shape)
+            if config['training']['model_name'] == 'cnn': #临时变量，有指针指向但不写入
+                config['training']['vocab_size'] = len(preprocessor.word2ind.keys())
+                # print("++++++++++++++++++++++++++++++")
+                # print(config['training']['vocab_size'])
+                # print("_______________________________")
+
+            pretrained_embedding = preprocessor.embedding_matrix if config['preprocessing'].get('embedding_file_input', None) else None
+
+            trainer = Trainer(config['training'], logger, preprocessor.classes, pretrained_embedding)
+            model, accuracy, cls_report, history = trainer.fit_and_validate(train_x, train_y, validate_x, validate_y)
             logger.info("accuracy:{}".format(accuracy))
             logger.info("\n{}\n".format(cls_report))
-            model = trainer.fit(data_x, data_y)
-            predictor = Predictor(config['predict'], logger, model)
+            model_full = trainer.fit(full_x, full_y)
+            predictor = Predictor(config['predict'], logger, model_full)
             probs = predictor.predict_prob(test_x)
             predictor.save_result(preprocessor.test_ids, probs)
         except yaml.YAMLError as err:
