@@ -11,31 +11,37 @@ preprocessing:
   input_testset: ./data/test.csv
   input_text_column: comment_text
   input_trainset: ./data/train.csv
+  embedding_file_input: ./data/glove.27B.100d.txt
   random_seed: 0
-  split_ratio: 0.2
+  split_ratio: 0.3
   max_features: 20000
+  embedding_dim: 100
   max_text_length: 400
   maxlen: 128
+  num_heads: 1
 
 
 training:
   batch_normalization: true
-  dropout_rate: 0.5
+  dropout_rate: 0.4
   epochs: 1
   gradient_cliping: true
   learning_rate: 0.8
-  model_name: cnn
+  model_name: transformer
   embedding_dim: 100
-  embedding_file_input: ./data/glove.6B.100d.txt
-  filters: 128
+  embedding_file_input: ./data/glove.27B.100d.txt
+  filters: 32
   kernel_size: 7
   maxlen: 128
-  hidden_dims: 256
-  loss: binary_crossentropy
+  hidden_dims: 64
+  loss: sparse_categorical_crossentropy
   optimizer: adam
   metrics: accuracy
   batch_size: 32
   pred_batch_size: 128
   verbose: 1
+  num_heads: 1
+  ff_dim: 128
+  vocab_size: 20000
 predict:
   output_path: ./data/submission.csv
